@@ -1,6 +1,6 @@
 #! /usr/local/bin/python3
 
-## ./generate_bugs.py width length
+## ./generate_bugs.py width height
 
 import sys
 import math
@@ -11,9 +11,11 @@ width = int(sys.argv[1])
 half_width = math.ceil(width/2)
 length = int(sys.argv[2])
 unique_pixels = half_width * length
+count = 0
 
 # count up in binary to find every combination of 0+1
 # in a symmetrical matrix of the given dimensions
+# (cutting the width in half since it's symmetrical)
 for i in itertools.product([0,1],repeat=unique_pixels):
 # make an array
     matrix = np.reshape(np.array(i),(length,half_width))
@@ -43,7 +45,21 @@ for i in itertools.product([0,1],repeat=unique_pixels):
             bug = True
             valid = False
 # when a valid bug is found:
-#!! print matrix number by converting to binary
 #!! print nicely-formatted reflected matrix (accounting for even numbers of columns)
     if bug:
-        print(matrix)
+        count += 1
+        print(int(''.join(map(str,i)),2))
+        pretty = ''
+        for x in range(0,half_width):
+            row=''
+            for y in range(0,length):
+# currently problematic with even widths
+                row += str(matrix[x][y])
+            if width % 2 == 0:
+                pretty += row + row[::-1] + '\n'
+            else:
+                pretty += row + row[::-1][1:] + '\n'
+        print(pretty.replace('1','\u2B1B').replace('0','\u2B1C'))
+
+# report how many total bugs were found with the given parameters
+print('YAY YOU FOUND '+str(count)+'BUGS')
