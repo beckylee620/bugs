@@ -37,9 +37,24 @@ for i in itertools.product([0,1],repeat=unique_pixels):
                     eyes += 1
                 if np.array_equal(matrix[y:y+3,x:x+3],np.array([[0,0,0],[0,1,0],[0,0,0]])):
                     valid = False
-#!! look along edges and middle for lonely 1s
-#!! and look along middle for extra eyes
         if eyes != 1:
+            valid = False
+# look along edges and middle for lonely 1s
+        middle = np.append(matrix[0:length,half_width-2:half_width],matrix[0:length,half_width-2:half_width-1],axis=1)
+        for y in range(0,length-2):
+            if np.array_equal(middle[y:y+3,0:3],np.array([[0,0,0],[0,1,0],[0,0,0]])):
+                valid = False
+# look along middle for extra eyes
+            elif np.array_equal(middle[y:y+3,0:3],np.array([[1,1,1],[1,0,1],[1,1,1]])):
+                valid = False
+# miscellaneous other checks for lonely pixels
+        for x in range(0,half_width-1):
+            for y in range(0,length-1):
+                if np.array_equal(matrix[y:y+2,x:x+2],np.array([[0,1],[1,0]])) or np.array_equal(matrix[y:y+2,x:x+2],np.array([[1,0],[0,1]])):
+                    valid = False
+        if np.array_equal(middle[0:2,0:3],np.array([[0,1,0],[0,0,0]])):
+            valid = False
+        elif np.array_equal(middle[length-2:length,0:3],np.array([[0,0,0],[0,1,0]])):
             valid = False
         if valid:
             bug = True
@@ -49,12 +64,13 @@ for i in itertools.product([0,1],repeat=unique_pixels):
     if bug:
         count += 1
         print(int(''.join(map(str,i)),2))
+        # print(matrix)
+        # print(middle[0:2,0:3])
         pretty = ''
-        for x in range(0,half_width):
+        for y in range(0,length):
             row=''
-            for y in range(0,length):
-# currently problematic with even widths
-                row += str(matrix[x][y])
+            for x in range(0,half_width):
+                row += str(matrix[y][x])
             if width % 2 == 0:
                 pretty += row + row[::-1] + '\n'
             else:
@@ -62,4 +78,4 @@ for i in itertools.product([0,1],repeat=unique_pixels):
         print(pretty.replace('1','\u2B1B').replace('0','\u2B1C'))
 
 # report how many total bugs were found with the given parameters
-print('YAY YOU FOUND '+str(count)+'BUGS')
+print('YAY YOU FOUND '+str(count)+' BUGS OUT OF '+str(int(''.join(map(str,i)),2)+1)+' POSSIBILITIES')
